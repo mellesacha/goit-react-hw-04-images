@@ -1,53 +1,46 @@
-import { Component } from "react";
+import { useState } from "react";
 import PropTypes from 'prop-types';
 import { SearchForm, Button, ButtonLabel, Input, Header } from "./Searchbar.styled";
 import { FiSearch } from "react-icons/fi";
 
-class Searchbar extends Component {
-state = {
-    search: ""
-    }
+const Searchbar = ({ onSubmit }) => {
+    const [search, setSearch] = useState('');
+
+    const handlInput = (e) => {
+        const { value } = e.target;
+        setSearch(value);
+    };
     
-    handlInput = (e) => {
-    const { value } = e.target;
-        this.setState({ search: value });
-    }
-    
-    handlSubmit = (e) => {
+    const handlSubmit = (e) => {
         e.preventDefault();
         
-        const { search } = this.state;
-
         if (search.trim() === '') {
             return
         };
 
-        this.props.onSubmit(search);
-        this.setState({search: ''})
+        onSubmit(search);
+        setSearch('')
     
-  };
+    };
 
-    render() {
-return (<Header>
-        <SearchForm onSubmit={this.handlSubmit}>
+    return (<Header>
+        <SearchForm onSubmit={handlSubmit}>
             <Button type="submit">
-            <ButtonLabel><FiSearch /></ButtonLabel>
+                <ButtonLabel><FiSearch /></ButtonLabel>
            
             </Button>
 
             <Input
                 className="input"
-            type="text"
-            value={this.state.search}
+                type="text"
+                value={search}
                 autoComplete="off"
                 autoFocus
                 placeholder="Search images and photos"
-                onChange={this.handlInput}
+                onChange={handlInput}
             />
         </SearchForm>
     </Header>)
-    }
-    
 };
 
 export default Searchbar;

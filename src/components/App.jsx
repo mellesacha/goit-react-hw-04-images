@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import Searchbar from "./Searchbar";
 import ImageGallery from "./ImageGallery";
 import Button from "./Button";
@@ -8,47 +8,37 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { PhotoFinder } from "./App.styled";
 
+export const App = () => {
+  const [search, setSearch] = useState('');
+  const [picture, setPicture] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loader, setLoader] = useState(false);
+  const [btnLoad, setBtnLoad] = useState(false);
 
-export class App extends Component {
+  const handleSubmit = (query) => {
+    setSearch(query);
+    setLoader(true);
+    setPage(1);
+    setPicture([])
+  };
 
-  state = {
-    search: "",
-    picture: [],
-    page: 1,
-    loader: false,
-    btnLoad: false
-  }
+  const handleBtnClick = () => {
+    setPage(page + 1)
+  };
 
-  handleSubmit = (query) => {
-    this.setState({ search: query, page: 1, picture: [] })
-  }
-
-  handleBtnClick = () => {
-    this.setState(prevState => {
-      return {
-        page: prevState.page + 1
-      }
-     
-    })
-  }
-
-  selectElImagesArr = (arr) => {
+  const selectElImagesArr = (arr) => {
     return arr.map(({ id, webformatURL, largeImageURL, tags }) => { return ({ id, webformatURL, largeImageURL, tags }) })
-}
+  };
 
-componentDidUpdate(_, prevState) {
-    
-    const { search, page} = this.state;
-  
+  useEffect(() => {
 
-  if (search !== prevState.search || page !== prevState.page) {
+    if (!search) {
+      return
+    }
 
-       this.setState({loader: true})
-   
-      fetchApi(search, page).then(({ totalHits, hits }) => {
+    fetchApi(search, page).then(({ totalHits, hits }) => {
 
-
-        this.setState(prevState => { return { picture: [...prevState.picture, ...this.selectElImagesArr(hits)] } });
+      setPicture(picture => { return [...picture, ...selectElImagesArr(hits)] });
 
         if (totalHits === 0) {
           toast('Nothing found for your request')
@@ -56,32 +46,27 @@ componentDidUpdate(_, prevState) {
         }
 
         if ( page < Math.ceil(totalHits / 12)) {
-          this.setState({ btnLoad: true })
+          setBtnLoad(true)
         }
 
-        else this.setState({ btnLoad: false })
+        else setBtnLoad(false)
        
       }
       
-      ).catch(error => console.log(`Oops! Something went wrong! ${error}`)).finally(() => this.setState({loader: false}))
-    
-    
-    }
-    }
+      ).catch(error => console.log(`Oops! Something went wrong! ${error}`)).finally(() => setLoader(false))
 
-  
-  render() {
+  }, [search, page])
 
-    const { loader, picture, btnLoad } = this.state;
-    return (<PhotoFinder>
-      <Searchbar onSubmit={this.handleSubmit} />
-      <ImageGallery picture={picture} />
-      {btnLoad  && <Button handleBtnClick={this.handleBtnClick}/>}
-      {loader && <Loader />}
-      <ToastContainer />
-    </PhotoFinder>
+ 
+  return (<PhotoFinder>
+    <Searchbar onSubmit={handleSubmit} />
+    <ImageGallery picture={picture} />
+    {btnLoad && <Button handleBtnClick={handleBtnClick} />}
+    {loader && <Loader />}
+    <ToastContainer />
+  </PhotoFinder>
     
   );
-  }
-  
-};
+}
+
+
