@@ -8,18 +8,20 @@ const modalRoot = document.querySelector('#modal-root');
 
 const Modal = ({ closeModal, largeImg, tag }) => {
 
-    const closeByEsc = (e) => {
+    
+
+    useEffect(() => {
+
+        const closeByEsc = (e) => {
         if (e.key === "Escape") {
             closeModal()
         }
     }
-
-    useEffect(() => {
         window.addEventListener('keydown', closeByEsc)
 
         return () => { window.removeEventListener('keydown', closeByEsc) }
    
-    }, []);
+    }, [closeModal]);
 
     return createPortal(
         <Overlay>
